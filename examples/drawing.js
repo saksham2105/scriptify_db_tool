@@ -312,9 +312,7 @@ t.name=tablenameToSet;
 username = document.getElementById("username").value;
 currentTable.name=tablenameToSet;
 projectLocalStorage.removeItem("tables");
-projectLocalStorage.removeItem("username");
 projectLocalStorage.setItem("tables",JSON.stringify(Tables));
-projectLocalStorage.setItem("username",username);
 draw(ctx);
 }
 function openModal(table)
@@ -424,11 +422,8 @@ t.Fields.push(field);
 t.height = t.height+30;
 }
 }
-username = document.getElementById("username").value;
 projectLocalStorage.removeItem("tables");
-projectLocalStorage.removeItem("username");
 projectLocalStorage.setItem("tables",JSON.stringify(Tables));
-projectLocalStorage.setItem("username",username);
 let headingNames=['Field','Datatype','Constraint','Edit','Delete'];
 var thead=document.createElement("thead");
 document.getElementById("fieldTable").innerHTML="";
