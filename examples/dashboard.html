@@ -134,7 +134,8 @@ Database Designing Tool
                    
                        <b style="color: black;"> Primary_Key : </b><b><input type='checkbox' id='primaryKey'></b>&nbsp;&nbsp;
                        <b style="color: black;">Auto_Increment : </b><b><input type="checkbox" id='autoIncrement'></b>&nbsp;&nbsp;
-                       <b style="color: black;">Unique : </b><input type="checkbox" id='isUnique'>&nbsp;&nbsp;
+                       <b style="color: black;">Unique : </b><input type="checkbox" id='isUnique'>&nbsp;&nbsp;<br/>
+                       <b style="color: black;">Foreign Key : </b><input type="checkbox" id="foreignKey" disabled>&nbsp;&nbsp;
                        <b style="color: black;">Null : </b><input type="checkbox" id='isNull'>
                        <br>
                        <b style="color: black;">DataType : </b> 
@@ -157,8 +158,11 @@ Database Designing Tool
                        <b style="color: black;"> Engine: </b><input type="text" size=10 id="engine">
                        <b style="color: black;">Table Name : </b><input type="text" size=12 id="tableName">
                        <br>
-                       <b style="color: black;"> Column Width: </b><input type="number" min="1" value="11" id="colWidth">
-                       
+                       <b style="color: black;"> Column Width: </b><input type="number" min="1" value="11" id="colWidth"><br/>
+                       <b style="color: black;">Foreign Key Eligible Tables : </b> 
+                       <select id="foreignKeyEligibleTables" name="foreignKeyEligibleTables" onChange="setCurrentFKTable()">
+                       </select><br/>
+                       <b style="color: black;"> Foreign Key Column: </b><input type="text" id="foreignKeyCol" name="foreignKeyCol" disabled><br/>
                        <button type="button" class="btn btn-primary" style="background-color:rgb(141, 118, 224);color: white;" onclick="addRow()">Add Field</button>
 
                        </div>

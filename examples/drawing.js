@@ -21,6 +21,7 @@ var increaseParameter = "";
 var lastModifiedTableDimension = null;
 var direction = "";
 var factor = 0;
+var currentForeignKeyColumn = "";
 function setColor(c) {
    color = c;
    draw(ctx);
@@ -36,6 +37,9 @@ this.isUnique=false;
 this.datatype="";
 this.fieldWidth="";
 this.name="";
+this.isForeignKey = false;
+this.foreignKeyRefTable = "";
+this.foreignKeyRefColumn = "";
 }
 }
 class Table
@@ -68,7 +72,6 @@ function setUsername() {
 function setup(canvasid)
 {
   if (projectLocalStorage.getItem("username") != null) {
-    console.log("Username as "+projectLocalStorage.getItem("username"))
     document.getElementById("unSpan").innerHTML = "";
     document.getElementById("unSpan").innerHTML = projectLocalStorage.getItem("username");
   }
@@ -463,6 +466,11 @@ function setTableDimension(t,f)
   if(ctx.measureText(textToWrite).width>maxWidth) {
     maxWidth=ctx.measureText(textToWrite).width;
   }
+  if (f.isForeignKey) {
+    textToWrite = f.name+" "+f.datatype+fieldWidth+" foreign key references "+f.foreignKeyRefTable+"("+f.foreignKeyRefColumn+")";
+    maxWidth=ctx.measureText(textToWrite).width;
+    maxWidth += 20;
+  }
   if (f.isPrimaryKey) {
     maxWidth += 20;
   }
@@ -550,7 +558,11 @@ ctx1.clearRect(0,0,canvas.width,canvas.height);
         unq=" unique";
         }
         var text =f.name+" "+f.datatype+fieldWidth+pk+autoInc+nn+unq;
-        if (primaryKeyImage != null) {
+        if (f.isForeignKey) {
+          primaryKeyImage = null;
+          text = f.name+" "+f.datatype+fieldWidth+" foreign key references "+f.foreignKeyRefTable+"("+f.foreignKeyRefColumn+")";
+        }
+          if (primaryKeyImage != null) {
           ctx1.drawImage(primaryKeyImage,t.x+10,t.y+t.height/2+15+depth,17,17);
           ctx1.fillText(text,t.x+28,t.y+t.height/2+30+depth);
           ctx1.fill();
@@ -617,24 +629,61 @@ t.name=tablenameToSet;
 //t.width=ctx.measureText(tablenameToSet).width+80;
 }
 }
-username = document.getElementById("username").value;
 currentTable.name=tablenameToSet;
 projectLocalStorage.removeItem("tables");
 projectLocalStorage.setItem("tables",JSON.stringify(Tables));
 draw(ctx);
 }
+
 function openModal(table)
 {
 var pk=document.getElementById("primaryKey");
+var fk = document.getElementById("foreignKey");
 var ai=document.getElementById("autoIncrement");
 var unq=document.getElementById("isUnique");
 var nl=document.getElementById("isNull");
 var fieldName=document.getElementById("fieldName");
 var tablenameToSet=document.getElementById("tableName");
+var foreignKeyEligibleTables = document.getElementById("foreignKeyEligibleTables");
+foreignKeyEligibleTables.innerHTML = "";
+document.getElementById("foreignKeyCol").value = "";
+fk.disabled = true;
+foreignKeyEligibleTables.innerHTML = "";
+var options = "";
+let optionsCount = 0;
+for (var t1 of Tables) {
+  if (table.name != t1.name) {
+     var isPrimaryKeyPresent = false;
+     for (var f of t1.Fields) {
+       if (f.isPrimaryKey) {
+         isPrimaryKeyPresent = true;
+         break;
+       }
+     }
+     if (isPrimaryKeyPresent) {
+      if (optionsCount == 0) {
+        var option = `<option value="${t1.name}" selected>${t1.name}</option>`;
+      } else {
+        var option = `<option value="${t1.name}">${t1.name}</option>`;
+      }
+      optionsCount +=1; 
+      options += option;
+    }
+  }
+}
+foreignKeyEligibleTables.innerHTML = options;
+if (foreignKeyEligibleTables.innerHTML.trim() != "" 
+&& foreignKeyEligibleTables.length > 0) {
+  setCurrentFKTable();
+}
+if (foreignKeyEligibleTables.value != undefined && foreignKeyEligibleTables.value != null && foreignKeyEligibleTables.value.trim().length != 0) {
+  fk.disabled = false;
+}
 pk.checked=false;
 ai.checked=false;
 unq.checked=false;
 nl.checked=false;
+fk.checked=false;
 fieldName.value="";
 tablenameToSet.value="";
   currentTable=table;
@@ -673,6 +722,7 @@ tablenameToSet.value="";
      if(field.isAutoIncrement) constraint=constraint+" "+"<i class='fa fa-plus'></i>";
      if(field.isUnique) constraint=constraint+" "+"unique";
      if(field.isNull) constraint=constraint+" "+"null";
+     if (field.isForeignKey) constraint = constraint+" "+"FK "+foreignKeyEligibleTables.value;
      data.innerHTML=constraint;
      row.appendChild(data);
      data=document.createElement("td");
@@ -700,6 +750,7 @@ tablenameToSet.value="";
 function addRow()
 {
 var pk=document.getElementById("primaryKey").checked;
+var fk = document.getElementById("foreignKey").checked;
 var ai=document.getElementById("autoIncrement").checked;
 var unq=document.getElementById("isUnique").checked;
 var nl=document.getElementById("isNull").checked;
@@ -709,10 +760,8 @@ var tablenameToSet=document.getElementById("tableName").value;
 var fieldWidth = document.getElementById("colWidth").value;
 var tableName=currentTable.name;
 var engine=document.getElementById("engine").value;
-if(fieldName.trim().length==0) {
-  alert("Field Name can't be empty");
-  return;
-}
+var foreignKeyTableName = document.getElementById("foreignKeyEligibleTables").value;
+var foreignKeyColName = document.getElementById("foreignKeyCol").value;
 let field=new Field();
 field.isPrimaryKey=pk;
 field.isAutoIncrement=ai;
@@ -721,7 +770,17 @@ field.isNull=nl;
 field.fieldWidth
 field.datatype=dt;
 field.name=fieldName;
+field.isForeignKey=fk;
+field.foreignKeyRefTable = foreignKeyTableName;
+field.foreignKeyRefColumn = foreignKeyColName;
 field.fieldWidth=fieldWidth;
+if(fieldName.trim().length==0 && !field.isForeignKey) {
+  alert("Field Name can't be empty");
+  return;
+}
+if (field.isForeignKey) {
+  field.name = field.foreignKeyRefTable.toLowerCase()+"_"+field.foreignKeyRefColumn;
+}
 for(var t of Tables)
 {
 if(t.name==tableName)
@@ -765,6 +824,7 @@ data.setAttribute("style","color:white");
    if(f.isAutoIncrement) constraint=constraint+" "+"<i class='fa fa-plus'></i>";
    if(f.isUnique) constraint=constraint+" "+"unique";
    if(f.isNull) constraint=constraint+" "+"null";
+   if (f.isForeignKey) constraint = constraint+" "+"FK "+foreignKeyTableName;
    data.innerHTML=constraint;
    row.appendChild(data);
    data=document.createElement("td");
@@ -927,6 +987,10 @@ for(var t of Tables)
       unq=" unique";
       }
       var text =f.name+" "+f.datatype+fieldWidth+pk+autoInc+nn+unq;
+      if (f.isForeignKey) {
+        primaryKeyImage = null;
+        text = f.name+" "+f.datatype+fieldWidth+" foreign key references "+f.foreignKeyRefTable+"("+f.foreignKeyRefColumn+")";
+      }
       if (primaryKeyImage != null) {
         ctx.drawImage(primaryKeyImage,t.x+10,t.y+t.height/2+15+depth,17,17);
         ctx.fillText(text,t.x+28,t.y+t.height/2+30+depth);
@@ -992,6 +1056,10 @@ for(var t of Tables)
         {
           primaryKeyImage = document.getElementById("pkImage");
           pk=" primary key";
+        }
+        if (f.isForeignKey) {
+          primaryKeyImage = null;
+          text = f.name+" "+f.datatype+fieldWidth+" foreign key references "+f.foreignKeyRefTable+"("+f.foreignKeyRefColumn+")";
         }
         if (f.fieldWidth!=undefined && f.fieldWidth.length > 0) {
           fieldWidth = "("+f.fieldWidth+")";
@@ -1098,6 +1166,10 @@ else
       unq=" unique";
       }
       var text =f.name+" "+f.datatype+fieldWidth+pk+autoInc+nn+unq;
+      if (f.isForeignKey) {
+        primaryKeyImage = null;
+        text = f.name+" "+f.datatype+fieldWidth+" foreign key references "+f.foreignKeyRefTable+"("+f.foreignKeyRefColumn+")";
+      }
       if (primaryKeyImage != null) {
         ctx.drawImage(primaryKeyImage,t.x+10,t.y+t.height/2+15+depth,17,17);
         ctx.fillText(text,t.x+28,t.y+t.height/2+30+depth);
@@ -1199,11 +1271,21 @@ function copyCode() {
       if (j == t.Fields.length-1) {
         if (f.engine != undefined) {
           fieldText =f.name+" "+f.datatype+fieldWidth+pk+autoInc+nn+unq+" )"+f.engine+";\n";
+          if (f.isForeignKey) {
+            fieldText = f.name+" "+f.datatype+fieldWidth+" foreign key references "+f.foreignKeyRefTable+"("+f.foreignKeyRefColumn+") "+")"+f.engine+";\n";
+          }
+
         } else {
           fieldText =f.name+" "+f.datatype+fieldWidth+pk+autoInc+nn+unq+" )"+";\n";
+          if (f.isForeignKey) {
+            fieldText = f.name+" "+f.datatype+fieldWidth+" foreign key references "+f.foreignKeyRefTable+"("+f.foreignKeyRefColumn+") "+")"+";\n";
+          }
         }
       } else {
         fieldText =f.name+" "+f.datatype+fieldWidth+pk+autoInc+nn+unq+",\n";
+        if (f.isForeignKey) {
+          fieldText = f.name+" "+f.datatype+fieldWidth+" foreign key references "+f.foreignKeyRefTable+"("+f.foreignKeyRefColumn+"),\n";
+        }
       }
       tableText += fieldText;
       j++;
@@ -1254,11 +1336,23 @@ function save()
       if (j == t.Fields.length-1) {
         if (f.engine != undefined) {
           fieldText =f.name+" "+f.datatype+fieldWidth+pk+autoInc+nn+unq+" )"+f.engine+";<br/>";
+          if (f.isForeignKey) {
+            fieldText = f.name+" "+f.datatype+fieldWidth+" foreign key references "+f.foreignKeyRefTable+"("+f.foreignKeyRefColumn+") "+")"+f.engine+";<br/>";
+          }
+  
         } else {
           fieldText =f.name+" "+f.datatype+fieldWidth+pk+autoInc+nn+unq+" )"+";<br/>";
+          if (f.isForeignKey) {
+            fieldText = f.name+" "+f.datatype+fieldWidth+" foreign key references "+f.foreignKeyRefTable+"("+f.foreignKeyRefColumn+") "+")"+";<br/>";
+          }
+
         }
-      } else {
+      } 
+      else {
         fieldText =f.name+" "+f.datatype+fieldWidth+pk+autoInc+nn+unq+",<br/>";
+        if (f.isForeignKey) {
+          fieldText = f.name+" "+f.datatype+fieldWidth+" foreign key references "+f.foreignKeyRefTable+"("+f.foreignKeyRefColumn+"),<br/>";
+        }
       }
       tableText += fieldText;
       j++;
@@ -1292,8 +1386,23 @@ function del()
  if (Tables == null || Tables.length ==0) projectLocalStorage.removeItem("tables");
 }
 function removeAllTables() {
-  console.log("Remove All invoked");
   projectLocalStorage.removeItem("tables");
   draw(ctx);
+}
+function setCurrentFKTable() {
+  var foreignKeyEligibleTables = document.getElementById("foreignKeyEligibleTables");
+  var tableName = foreignKeyEligibleTables.value;
+  var foreignKeyCol = document.getElementById("foreignKeyCol");
+  for (var t of Tables) {
+     if (t.name == tableName) {
+       for (var f of t.Fields) {
+         if (f.isPrimaryKey) {
+           currentForeignKeyColumn = f.name;
+           break;
+         }
+       }
+     }
+  }
+  foreignKeyCol.value = currentForeignKeyColumn;
 }
 
