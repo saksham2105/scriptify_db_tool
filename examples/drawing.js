@@ -498,6 +498,168 @@ function setTableDimension(t,f)
   draw(ctx);
 }
 
+function getParentAndChildTablePositions (childTableName,parentTableName) {
+  var x1,y1,x2,y2,areCoinciding,childTable,parentTable,h,k,radiusX,radiusY,rotationAngle;
+  var found = false;
+  for (var t of Tables) {
+   if (t.name == childTableName) {
+     childTable = t;
+   }
+   if (t.name == parentTableName) {
+     parentTable = t;
+   }
+ }
+ /**Important Cases to Handle */
+
+ /**
+  * Cases when Child and Parent Table Cordinates Doesn't Coincide
+  */
+ /**Case 1 - Parent Table Lie on Top Right side */
+ if (parentTable.x > childTable.x+childTable.width && parentTable.y+parentTable.height < childTable.y && !found) {
+    console.log("Inside Case 1");
+    found = true;
+    areCoinciding = false;
+    x1 = childTable.rightMidX;
+    y1 = childTable.rightMidY;
+    x2 = parentTable.bottomMidX;
+    y2 = parentTable.bottomMidY;
+    h = x1;
+    k = y2;
+    radiusX = Math.abs(x2-x1);
+    radiusY = Math.abs(y2-y1);
+    rotationAngle = 0;
+ }
+  /**Case 2 - Parent Table Lie on Bottom Right side */
+  if (parentTable.x > childTable.x+childTable.width && parentTable.y > childTable.y+childTable.height && !found) {
+    console.log("Inside Case 2");
+    found = true;
+    areCoinciding = false;
+    x1 = childTable.bottomMidX;
+    y1 = childTable.bottomMidY;
+    x2 = parentTable.leftMidX;
+    y2 = parentTable.leftMidY;
+    h = x2;
+    k = y1;
+    radiusX = Math.abs(y2-y1);
+    radiusY = Math.abs(x2-x1);
+    rotationAngle = 1/2*Math.PI;
+ }
+ /**Case 3 - Parent Table Lie on Left Top side */
+ if (parentTable.x+parentTable.width < childTable.x && parentTable.y+parentTable.height < childTable.y && !found) {
+    console.log("Inside Case 3");
+    found = true;
+    areCoinciding = false;
+    x1 = childTable.leftMidX;
+    y1 = childTable.leftMidY;
+    x2 = parentTable.bottomMidX;
+    y2 = parentTable.bottomMidY; 
+    h = x1;
+    k = y2;
+    radiusX = Math.abs(y2-y1);
+    radiusY = Math.abs(x2-x1);
+    rotationAngle = 1/2*Math.PI;
+  }
+ /**Case 4 - Parent Table Lie on Bottom Left side */
+ if (parentTable.x+parentTable.width < childTable.x && parentTable.y > childTable.y+childTable.height && !found) {
+  console.log("Inside Case 4");
+  found = true;
+  areCoinciding = false;
+  x1 = childTable.bottomMidX;
+  y1 = childTable.bottomMidY;
+  x2 = parentTable.rightMidX;
+  y2 = parentTable.rightMidY;
+  h = x2;
+  k = y1;
+  radiusX = Math.abs(x2-x1);
+  radiusY = Math.abs(y2-y1);
+  rotationAngle = 2*Math.PI;
+}
+/**
+ * Cases When Child and Parent's Position can coinicide
+ */
+ /**Case 1 Parent Lie on Top of Child */
+ if (parentTable.x <= childTable.x+childTable.width && parentTable.x >= childTable.x && !found) {
+   console.log("Inside Case 5");
+   found = true;
+   areCoinciding = true;
+   x1 = childTable.topMidX;
+   y1 = childTable.topMidY;
+   x2 = parentTable.bottomMidX;
+   y2 = parentTable.bottomMidY;
+ }
+ /**Case 2 - Parent Lie or Right Side From top */
+ if (parentTable.y+parentTable.height >= childTable.y && parentTable.y+parentTable.height <= childTable.y + childTable.height && !found) {
+   console.log("Inside Case 6");
+   found = true;
+   areCoinciding = true;
+   x1 = childTable.leftMidX;
+   y1 = childTable.leftMidY;
+   x2 = parentTable.rightMidX;
+   y2 = parentTable.rightMidY;
+ }
+ /**Case - 3 Parent Lie on Bottom Right */
+ if (parentTable.x >= childTable.x && parentTable.x <= childTable.x+childTable.width && !found) {
+   console.log("Inside Case 7");
+   found = true;
+   areCoinciding = true;
+   x1 = childTable.bottomMidX;
+   y1 = childTable.bottomMidY;
+   x2 = parentTable.topMidX;
+   y2 = parentTable.topMidY;
+ }
+ /**Case -4 Parent Lie on Bottom Up */
+ if (parentTable.y >= childTable.y && parentTable.y <= childTable.y+childTable.height && !found) {
+  console.log("Inside Case 8");
+  found = true;
+  areCoinciding = true;
+  x1 = childTable.leftMidX;
+  y1 = childTable.leftMidY;
+  x2 = parentTable.rightMidX;
+  y2 = parentTable.rightMidY;
+ }
+ /**Case 5 - Parent Lie on Top Left */
+ if (parentTable.x+ parentTable.width >= childTable.x && parentTable.x+ parentTable.width <= childTable.x+childTable.width && !found) {
+  console.log("Inside Case 9");
+  found = true;
+  areCoinciding = true;
+  x1 = childTable.bottomMidX;
+  y1 = childTable.bottomMidY;
+  x2 = parentTable.topMidX;
+  y2 = parentTable.topMidY;
+ }
+ /**Case 6 - Parent Sliding on Top Top Bottom */
+ if (parentTable.y+parentTable.height >= childTable.height && parentTable.y+parentTable.height <= childTable.height+childTable.y && !found) {
+  console.log("Inside Case 10");
+  found = true;
+  areCoinciding = true;
+  x1 = childTable.topMidX;
+  y1 = childTable.topMidY;
+  x2 = parentTable.bottomMidX;
+  y2 = parentTable.bottomMidY;
+ }
+ /**Case 7 - Parent is sliding from Bottom Left */
+ if (parentTable.x+parentTable.width >= childTable.x && parentTable.x+parentTable.width <= childTable.x+childTable.width && !found) {
+  console.log("Inside Case 11");
+  found = true;
+  areCoinciding = true;
+  x1 = childTable.bottomMidX;
+  y1 = childTable.bottomMidY;
+  x2 = parentTable.topMidX;
+  y2 = parentTable.topMidY; 
+ }
+ /**Case 8 - parent is Sliding from Bottom to top in left side */
+ if (parentTable.y >= childTable.y && parentTable.y <= childTable.y+childTable.height && !found) {
+   console.log("Inside Case 12");
+   found = true;
+   areCoinciding = true;
+   x1 = childTable.leftMidX;
+   y1 = childTable.leftMidY;
+   x2 = parentTable.rightMidX;
+   y2 = parentTable.rightMidY;
+ }
+return {x1,y1,x2,y2,areCoinciding,h,k,radiusX,radiusY,rotationAngle};
+}
+
 function draw(ctx1)
 {
 ctx1.clearRect(0,0,canvas.width,canvas.height);
@@ -527,10 +689,8 @@ ctx1.clearRect(0,0,canvas.width,canvas.height);
     if(t.Fields.length>0)
     {
       let depth = 0;
+      var positionObject = undefined;
       for (var f of t.Fields) {
-        ctx1.beginPath();
-        ctx1.fillStyle=color;
-        ctx1.font="20px Arial";
         var pk="";
         var autoInc="";
         var nn="";
@@ -561,7 +721,27 @@ ctx1.clearRect(0,0,canvas.width,canvas.height);
         if (f.isForeignKey) {
           primaryKeyImage = null;
           text = f.name+" "+f.datatype+fieldWidth+" foreign key references "+f.foreignKeyRefTable+"("+f.foreignKeyRefColumn+")";
+          positionObject = getParentAndChildTablePositions(t.name,f.foreignKeyRefTable); 
         }
+        if (positionObject != undefined) {
+          /**To Draw Curve Or Line */
+          let areTablesCoinciding = positionObject.areCoinciding;
+          if (areTablesCoinciding) {
+           /**Code to Draw Line */ 
+           ctx1.beginPath();
+           ctx1.moveTo(positionObject.x1, positionObject.y1);
+           ctx1.lineTo(positionObject.x2, positionObject.y2);
+           ctx1.stroke();
+          } else {
+            /**Code to Draw Elliptical Curve */
+            ctx1.beginPath();
+            ctx1.ellipse(positionObject.h,positionObject.k,positionObject.radiusX,positionObject.radiusY,positionObject.rotationAngle, 0, 1/2 * Math.PI);
+            ctx1.stroke();
+          }
+        }
+          ctx1.beginPath();
+          ctx1.fillStyle=color;
+          ctx1.font="20px Arial";
           if (primaryKeyImage != null) {
           ctx1.drawImage(primaryKeyImage,t.x+10,t.y+t.height/2+15+depth,17,17);
           ctx1.fillText(text,t.x+28,t.y+t.height/2+30+depth);
@@ -956,10 +1136,8 @@ for(var t of Tables)
   if(t.Fields.length>0)
   {
     let depth = 0;
+    var positionObject = undefined;
     for (var f of t.Fields) {
-      ctx.beginPath();
-      ctx.fillStyle=color;
-      ctx.font="20px Arial";
       var pk="";
       var autoInc="";
       var nn="";
@@ -990,7 +1168,27 @@ for(var t of Tables)
       if (f.isForeignKey) {
         primaryKeyImage = null;
         text = f.name+" "+f.datatype+fieldWidth+" foreign key references "+f.foreignKeyRefTable+"("+f.foreignKeyRefColumn+")";
+        positionObject = getParentAndChildTablePositions(t.name,f.foreignKeyRefTable); 
       }
+      if (positionObject != undefined) {
+        /**To Draw Curve Or Line */
+        let areTablesCoinciding = positionObject.areCoinciding;
+        if (areTablesCoinciding) {
+         /**Code to Draw Line */ 
+         ctx.beginPath();
+         ctx.moveTo(positionObject.x1, positionObject.y1);
+         ctx.lineTo(positionObject.x2, positionObject.y2);
+         ctx.stroke();
+        } else {
+          /**Code to Draw Elliptical Curve */
+          ctx.beginPath();
+          ctx.ellipse(positionObject.h,positionObject.k,positionObject.radiusX,positionObject.radiusY,positionObject.rotationAngle, 0, 1/2 * Math.PI);
+          ctx.stroke();
+        }
+      }
+      ctx.beginPath();
+      ctx.fillStyle=color;
+      ctx.font="20px Arial";
       if (primaryKeyImage != null) {
         ctx.drawImage(primaryKeyImage,t.x+10,t.y+t.height/2+15+depth,17,17);
         ctx.fillText(text,t.x+28,t.y+t.height/2+30+depth);
@@ -1042,10 +1240,8 @@ for(var t of Tables)
     if(t.Fields.length>0)
     {
       let depth = 0;
+      var positionObject = undefined;
       for (var f of t.Fields) {
-        ctx.beginPath();
-        ctx.fillStyle=color;
-        ctx.font="20px Arial";
         var pk="";
         var autoInc="";
         var nn="";
@@ -1080,7 +1276,27 @@ for(var t of Tables)
         if (f.isForeignKey) {
           primaryKeyImage = null;
           text = f.name+" "+f.datatype+fieldWidth+" foreign key references "+f.foreignKeyRefTable+"("+f.foreignKeyRefColumn+")";
+          positionObject = getParentAndChildTablePositions(t.name,f.foreignKeyRefTable); 
         }
+        if (positionObject != undefined) {
+          /**To Draw Curve Or Line */
+          let areTablesCoinciding = positionObject.areCoinciding;
+          if (areTablesCoinciding) {
+           /**Code to Draw Line */ 
+           ctx.beginPath();
+           ctx.moveTo(positionObject.x1, positionObject.y1);
+           ctx.lineTo(positionObject.x2, positionObject.y2);
+           ctx.stroke();
+          } else {
+            /**Code to Draw Elliptical Curve */
+            ctx.beginPath();
+            ctx.ellipse(positionObject.h,positionObject.k,positionObject.radiusX,positionObject.radiusY,positionObject.rotationAngle, 0, 1/2 * Math.PI);
+            ctx.stroke();
+          }
+        }
+        ctx.beginPath();
+        ctx.fillStyle=color;
+        ctx.font="20px Arial";
         if (primaryKeyImage != null) {
           ctx.drawImage(primaryKeyImage,t.x+10,t.y+t.height/2+15+depth,17,17);
           ctx.fillText(text,t.x+28,t.y+t.height/2+30+depth);
@@ -1139,10 +1355,8 @@ else
   if(t.Fields.length>0)
   {
     let depth = 0;
+    var positionObject = undefined;
     for (var f of t.Fields) {
-      ctx.beginPath();
-      ctx.fillStyle=color;
-      ctx.font="20px Arial";
       var pk="";
       var autoInc="";
       var nn="";
@@ -1173,7 +1387,27 @@ else
       if (f.isForeignKey) {
         primaryKeyImage = null;
         text = f.name+" "+f.datatype+fieldWidth+" foreign key references "+f.foreignKeyRefTable+"("+f.foreignKeyRefColumn+")";
+        positionObject = getParentAndChildTablePositions(t.name,f.foreignKeyRefTable); 
       }
+      if (positionObject != undefined) {
+        /**To Draw Curve Or Line */
+        let areTablesCoinciding = positionObject.areCoinciding;
+        if (areTablesCoinciding) {
+         /**Code to Draw Line */ 
+         ctx.beginPath();
+         ctx.moveTo(positionObject.x1, positionObject.y1);
+         ctx.lineTo(positionObject.x2, positionObject.y2);
+         ctx.stroke();
+        } else {
+          /**Code to Draw Elliptical Curve */
+          ctx.beginPath();
+          ctx.ellipse(positionObject.h,positionObject.k,positionObject.radiusX,positionObject.radiusY,positionObject.rotationAngle, 0, 1/2 * Math.PI);
+          ctx.stroke();
+        }
+      }
+      ctx.beginPath();
+      ctx.fillStyle=color;
+      ctx.font="20px Arial";
       if (primaryKeyImage != null) {
         ctx.drawImage(primaryKeyImage,t.x+10,t.y+t.height/2+15+depth,17,17);
         ctx.fillText(text,t.x+28,t.y+t.height/2+30+depth);
@@ -1410,3 +1644,19 @@ function setCurrentFKTable() {
   foreignKeyCol.value = currentForeignKeyColumn;
 }
 
+function onPrimaryKeyCheckboxClicked() {
+  if (document.getElementById("primaryKey").checked) {
+    document.getElementById("foreignKey").disabled = true;
+  }
+  else {
+    document.getElementById("foreignKey").disabled = false;
+  }
+}
+function onForeignKeyCheckboxClicked() {
+  if (document.getElementById("foreignKey").checked) {
+    document.getElementById("primaryKey").disabled = true;
+  }
+  else {
+    document.getElementById("primaryKey").disabled = false;
+  }
+}

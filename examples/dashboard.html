@@ -132,10 +132,10 @@ Database Designing Tool
                   
                          <div class="card-body" style="background-color: whitesmoke;">
                    
-                       <b style="color: black;"> Primary_Key : </b><b><input type='checkbox' id='primaryKey'></b>&nbsp;&nbsp;
+                       <b style="color: black;"> Primary_Key : </b><b><input type='checkbox' id='primaryKey' onclick="onPrimaryKeyCheckboxClicked()"></b>&nbsp;&nbsp;
                        <b style="color: black;">Auto_Increment : </b><b><input type="checkbox" id='autoIncrement'></b>&nbsp;&nbsp;
                        <b style="color: black;">Unique : </b><input type="checkbox" id='isUnique'>&nbsp;&nbsp;<br/>
-                       <b style="color: black;">Foreign Key : </b><input type="checkbox" id="foreignKey" disabled>&nbsp;&nbsp;
+                       <b style="color: black;">Foreign Key : </b><input type="checkbox" id="foreignKey" disabled onclick="onForeignKeyCheckboxClicked()">&nbsp;&nbsp;
                        <b style="color: black;">Null : </b><input type="checkbox" id='isNull'>
                        <br>
                        <b style="color: black;">DataType : </b> 
