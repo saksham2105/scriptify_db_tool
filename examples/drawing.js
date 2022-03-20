@@ -1673,3 +1673,7 @@ function onForeignKeyCheckboxClicked() {
     document.getElementById("primaryKey").disabled = false;
   }
 }
+function saveDatabaseName() {
+  let db = prompt("Please enter Database name");
+  databaseName = db; 
+}
