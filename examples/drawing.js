@@ -1077,6 +1077,10 @@ for(var t of Tables)
         unq=" unique";
         }
         var text =f.name+" "+f.datatype+fieldWidth+pk+autoInc+nn+unq;
+        if (f.isForeignKey) {
+          primaryKeyImage = null;
+          text = f.name+" "+f.datatype+fieldWidth+" foreign key references "+f.foreignKeyRefTable+"("+f.foreignKeyRefColumn+")";
+        }
         if (primaryKeyImage != null) {
           ctx.drawImage(primaryKeyImage,t.x+10,t.y+t.height/2+15+depth,17,17);
           ctx.fillText(text,t.x+28,t.y+t.height/2+30+depth);
