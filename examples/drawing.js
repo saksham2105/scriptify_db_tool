@@ -1675,5 +1675,7 @@ function onForeignKeyCheckboxClicked() {
 }
 function saveDatabaseName() {
   let db = prompt("Please enter Database name");
-  databaseName = db; 
+  if (db != null && db != undefined) {
+    databaseName = db; 
+  }
 }
